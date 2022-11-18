@@ -1,2 +1,5 @@
 # ML_AI_Algorithmic-Trading
 Making constant sustainable gains in the equity/ forex markets by retail traders is quite unfeasible in today’s media, emotion, or event driven markets. Investment Banking giants such as BlackRock, Goldman Sachs, Sequoia capital, etc leverage real time statistics and quantitative analysis to make profitable trades. With the rapid improvement in computer science domain, especially in the field of Artificial Intelligence and Big Data analytics, it is now possible to analyze massive loads of real time data and leverage artificial intelligence to provide with tickers or autonomously carry out trade operations. We intend to create a web-based application which can serve as a trading platform for retail traders or even corporate giants, with a recurring subscription cost and a specific profit percentage cut.
+
+# Note: Access the one drive link for complete code
+https://aseblr-my.sharepoint.com/:f:/g/personal/bl_en_u4aie20002_bl_students_amrita_edu/Eh9v2NTCX7FEuZEUbX_Srk0B2qFy5K2LS8OO5RxjzdHpFg?e=gsPvOC
