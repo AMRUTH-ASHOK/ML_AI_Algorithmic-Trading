@@ -57,8 +57,8 @@ class ConTrader():
         self.raw_data = self.raw_data.append(self.tick_data.resample(self.bar_length, 
                                                              label="right").last().ffill().iloc[:-1])
         self.last_bar = self.raw_data.index[-1]  
-        #print the whole dataframe
-        print(self.data)
+        #print resampled data
+        print(self.data.tail(1))
 
     # simple moving average strategy
     def define_strategy(self): # "strategy-specific"
@@ -122,15 +122,14 @@ class ConTrader():
         units = api.get_open_positions().amountK.iloc[-1]
         price = api.get_open_positions().open.iloc[-1]
         unreal_pl = api.get_open_positions().grossPL.sum()
+        time = time.tz_localize("UTC").tz_convert("Asia/Kolkata")
         print("\n" + 100* "-")
         print("{} | {}".format(time, going))
-        print("{} | units = {} | price = {} | Unreal. P&L = {}".format(time, units, price, unreal_pl))
-        # print current SMA values
-        print("{} | SMA_S = {} | SMA_L = {}".format(time, self.data.SMA_S.iloc[-1], self.data.SMA_L.iloc[-1]))
+        print("{} | units = {} | price = {} | Unreal. P&L = {}  |  SMA_S = {}  |  SMA_L = {}".format(time, units, price, unreal_pl, self.data.SMA_S.iloc[-1], self.data.SMA_L.iloc[-1]))
         print(100 * "-" + "\n")
         # write to csv
         with open("trades.csv", "a") as f:
-            f.write("{},{},{},{},{}\n".format(self.instrument,time, going, units, price, unreal_pl))
+            f.write("{},{},{},{},{}\n".format(self.instrument,time, going, units, price, unreal_pl,self.data.SMA_S.iloc[-1], self.data.SMA_L.iloc[-1]))
         
 if __name__ == "__main__":  
     api = fxcmpy.fxcmpy(config_file = "/Users/amruthashok/Desktop/AI-Trader/Trader/FXCM.cfg")
