@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import fxcmpy
 import time
+import pytz
 from datetime import datetime
 
 col = ["tradeId", "amountK", "currency", "grossPL", "isBuy"]
@@ -26,7 +27,7 @@ class ConTrader():
         self.SMA_L = SMA_L
         #************************************************************************        
     
-    def get_most_recent(self, period = "m1", number = 10000):
+    def get_most_recent(self, period = "H1", number = 100):
         while True:  
             time.sleep(5)
             df = api.get_candles(self.instrument, number = number, period = period, columns = ["bidclose", "askclose"])
@@ -57,8 +58,7 @@ class ConTrader():
         self.raw_data = self.raw_data.append(self.tick_data.resample(self.bar_length, 
                                                              label="right").last().ffill().iloc[:-1])
         self.last_bar = self.raw_data.index[-1]  
-        #print resampled data
-        print(self.data.tail(1))
+        print(self.data)
 
     # simple moving average strategy
     def define_strategy(self): # "strategy-specific"
@@ -90,6 +90,7 @@ class ConTrader():
         if self.flag == 0:
             print("skipping first execution")
             self.flag = 1
+            self.position = self.data["position"].iloc[-1]
         else:
             if self.data["position"].iloc[-1] == 1:
                 if self.position == 0:
@@ -98,6 +99,8 @@ class ConTrader():
                 elif self.position == -1:
                     order = api.create_market_buy_order(self.instrument, self.units * 2)
                     self.report_trade(order, "GOING LONG")  
+                elif self.position == 1:
+                    print("ALREADY LONG")
                 self.position = 1
             elif self.data["position"].iloc[-1] == -1: 
                 if self.position == 0:
@@ -106,6 +109,8 @@ class ConTrader():
                 elif self.position == 1:
                     order = api.create_market_sell_order(self.instrument, self.units * 2)
                     self.report_trade(order, "GOING SHORT")  
+                elif self.position == -1:
+                    print("ALREADY SHORT")
                 self.position = -1
             elif self.data["position"].iloc[-1] == 0: 
                 if self.position == -1:
@@ -114,11 +119,14 @@ class ConTrader():
                 elif self.position == 1:
                     order = api.create_market_sell_order(self.instrument, self.units)
                     self.report_trade(order, "GOING NEUTRAL")  
+                elif self.position == 0:
+                    print("ALREADY NEUTRAL")
                 self.position = 0
 
 
     def report_trade(self, order, going):  
         time = order.get_time()
+        # convert time to Indian Standard Time
         units = api.get_open_positions().amountK.iloc[-1]
         price = api.get_open_positions().open.iloc[-1]
         unreal_pl = api.get_open_positions().grossPL.sum()
@@ -129,10 +137,10 @@ class ConTrader():
         print(100 * "-" + "\n")
         # write to csv
         with open("trades.csv", "a") as f:
-            f.write("{},{},{},{},{}\n".format(self.instrument,time, going, units, price, unreal_pl,self.data.SMA_S.iloc[-1], self.data.SMA_L.iloc[-1]))
+            f.write("{},  {},  {},  {},  {},  {},  {},{}\n".format(self.instrument,type(time), going, units, price, unreal_pl,self.data.SMA_S.iloc[-1], self.data.SMA_L.iloc[-1]))
         
 if __name__ == "__main__":  
     api = fxcmpy.fxcmpy(config_file = "/Users/amruthashok/Desktop/AI-Trader/Trader/FXCM.cfg")
-    trader = ConTrader("EUR/USD", bar_length = "5min", SMA_S=10,SMA_L=30, units = 1)
+    trader = ConTrader("USDOLLAR", bar_length = "60min", SMA_S=10,SMA_L=30, units = 1)
     trader.get_most_recent()
     api.subscribe_market_data(trader.instrument, (trader.get_tick_data, ))
