@@ -125,8 +125,17 @@ class ConTrader():
 
 
     def report_trade(self, order, going):  
-        time = order.get_time()
-        # convert time to Indian Standard Time
+        # time = order.get_time()
+        # get current time in IST
+        # Get current time in Coordinated Universal Time
+        utc = pytz.utc
+        now_utc = datetime.now(utc)
+
+        # Convert Coordinated Universal Time to India Standard Time
+        ist = pytz.timezone('Asia/Kolkata')
+        now_ist = now_utc.astimezone(ist)
+        time = now_ist
+        
         units = api.get_open_positions().amountK.iloc[-1]
         price = api.get_open_positions().open.iloc[-1]
         unreal_pl = api.get_open_positions().grossPL.sum()
@@ -141,6 +150,6 @@ class ConTrader():
         
 if __name__ == "__main__":  
     api = fxcmpy.fxcmpy(config_file = "/Users/amruthashok/Desktop/AI-Trader/Trader/FXCM.cfg")
-    trader = ConTrader("USDOLLAR", bar_length = "60min", SMA_S=10,SMA_L=30, units = 1)
+    trader = ConTrader("USDOLLAR", bar_length = "30min", SMA_S=10,SMA_L=30, units = 1)
     trader.get_most_recent()
     api.subscribe_market_data(trader.instrument, (trader.get_tick_data, ))
